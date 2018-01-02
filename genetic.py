@@ -21,7 +21,8 @@ from random import randint, random, randrange
 
 import numpy as np
 
-core_count = 8
+total_cores = 8
+low_perf_multiplier = 2
 
 
 class Task:
@@ -46,10 +47,6 @@ class CoreQueue:
         self.low = low
 
 
-def get_random_core(cores, low=True):
-    return randrange(cores / 2) if low else randrange(cores / 2, cores)
-
-
 def can_schedule_on_low(core_queues, task):
     for queue in core_queues:
         if queue.low:
@@ -58,44 +55,30 @@ def can_schedule_on_low(core_queues, task):
     return False
 
 
-def create_individual(tasks, cores=core_count):
+def create_individual(tasks, low_percent=0.8):
     """
     Create a member of the population.
 
     """
-    core_queues = [CoreQueue() for _ in range(cores)]
-    schedule = np.zeros((2, len(tasks)))
+    schedule = np.zeros(len(tasks), dtype=int)
     for task in tasks:
-        job = Job(task.id)
-        if can_schedule_on_low(core_queues, task):
-            core = get_random_core(cores)
+        if random() < low_percent:
+            selected_core = randrange(total_cores / 2)
         else:
-            core = get_random_core(cores, False)
-        job.start = core_queues[core].last_job
-
-        if core > cores / 2:
-            job.end = job.start + task.exec_time
-            schedule[0][task.id] = core
-        else:
-            job.end = job.start + 2 * task.exec_time
-            schedule[1][task.id] = core
-        core_queues[core].jobs.append(job)
-        core_queues[core].last_job = job.end
+            selected_core = randrange(total_cores / 2, total_cores)
+        schedule[task.id] = selected_core
 
     return schedule
 
 
-def create_population(count, cores=core_count):
+def create_population(tasks, population_size):
     """
     Create a number of individuals (i.e. a population).
-
+    tasks: data structure holding tasks
     count: the number of individuals in the population
-    length: the number of values per individual
-    min: the minimum possible value in an individual's list of values
-    max: the maximum possible value in an individual's list of values
 
     """
-    return [create_individual(cores) for _ in range(count)]
+    return [create_individual(tasks) for _ in range(population_size)]
 
 
 def fitness_for_queue(core, queue):
@@ -103,7 +86,7 @@ def fitness_for_queue(core, queue):
     time = 0
     missed = 0
     for item in queue:
-        exec_time_on_core = item.exec_time if core < core_count / 2 else item.exec_time * 2
+        exec_time_on_core = item.exec_time if core < total_cores / 2 else item.exec_time * 2
         if time + exec_time_on_core > item.deadline:
             score -= 100000
             missed += 1
@@ -114,13 +97,13 @@ def fitness_for_queue(core, queue):
     return score, missed
 
 
-def fitness(individual):
+def fitness(tasks, individual):
     """
     Determine the fitness of an individual. Higher is better.
 
     individual: the individual to evaluate
     """
-    core_queues = [[] for _ in range(core_count)]
+    core_queues = [[] for _ in range(total_cores)]
     for index in range(len(tasks)):
         core_queues[individual[index]].append(tasks[index])
 
@@ -134,7 +117,7 @@ def fitness(individual):
     return score, missed
 
 
-def grade(population):
+def grade(tasks, population):
     """
     Find average fitness for a population.
 
@@ -143,7 +126,7 @@ def grade(population):
     total_misses = 0
     perfect_individuals = 0
     for individual in population:
-        score, missed = fitness(individual)
+        score, missed = fitness(tasks, individual)
         summed += score
         total_misses += missed
         if missed == 0:
@@ -187,7 +170,7 @@ def evolve(population, retain=0.15, random_select=0.05, mutate=0.02):
             # restricts the range of possible values,
             # but the function is unaware of the min/max
             # values used to create the individuals,
-            individual[pos_to_mutate] = randint(0, core_count - 1)
+            individual[pos_to_mutate] = randint(0, total_cores - 1)
 
     # crossover parents to create children
     parents_length = len(parents)
@@ -256,15 +239,20 @@ def add_deadline():
             print('', file=o)
 
 
-if __name__ == '__main__':
+def main():
     # add_deadline()
     tasks = parse_tasks()
-    create_individual(tasks)
-    # population_count = 1000
-    # p = create_population(population_count)
-    # fitness_history = [grade(p), ]
+    # indiv = create_individual(tasks)
+    population_size = 10
+    population = create_population(tasks, population_size)
+    print(population)
+    # fitness_history = [grade(tasks, population), ]
     # for i in range(1000):
     #     p = evolve(p)
     #     g, m, pi = grade(p)
     #     fitness_history.append((g, m, pi))
     #     print(i + 1, g, m, pi)
+
+
+if __name__ == '__main__':
+    main()
