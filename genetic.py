@@ -17,9 +17,8 @@ for datum in fitness_history:
 """
 from __future__ import print_function
 
+import copy
 from random import randint, random, randrange
-
-import numpy as np
 
 total_cores = 8
 low_perf_multiplier = 2
@@ -31,6 +30,16 @@ class Task:
         self.id = 0
         self.exec_time = 0
         self.deadline = 0
+        self.start_time = 0
+        self.core = -1
+
+    def __repr__(self):
+        return 'id: {} core: {} start_time: {} exec_time: {}'.format(
+            self.id,
+            self.core,
+            self.start_time,
+            self.exec_time
+        )
 
 
 class Job:
@@ -47,20 +56,12 @@ class CoreQueue:
         self.low = low
 
 
-def can_schedule_on_low(core_queues, task):
-    for queue in core_queues:
-        if queue.low:
-            if task.deadline <= queue.last_job + task.exec_time * 2:
-                return True
-    return False
-
-
-def create_individual(tasks, low_percent=0.8):
+def create_individual(tasks, low_percent=0.75):
     """
     Create a member of the population.
 
     """
-    schedule = np.zeros(len(tasks), dtype=int)
+    schedule = [0 for _ in range(len(tasks))]
     for task in tasks:
         if random() < low_percent:
             selected_core = randrange(total_cores / 2)
@@ -83,18 +84,13 @@ def create_population(tasks, population_size):
 
 def fitness_for_queue(core, queue):
     score = 0
-    time = 0
-    missed = 0
-    for item in queue:
-        exec_time_on_core = item.exec_time if core < total_cores / 2 else item.exec_time * 2
-        if time + exec_time_on_core > item.deadline:
-            score -= 100000
-            missed += 1
+    for task in queue:
+        exec_time = task.exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
+        if task.deadline > task.start_time + exec_time:
+            score -= 1000
         else:
-            score += item.deadline - time - exec_time_on_core
-        time += exec_time_on_core
-
-    return score, missed
+            score += task.deadline - task.start_time - exec_time
+    return score
 
 
 def fitness(tasks, individual):
@@ -103,18 +99,29 @@ def fitness(tasks, individual):
 
     individual: the individual to evaluate
     """
+    new_tasks = copy.deepcopy(tasks)
+
     core_queues = [[] for _ in range(total_cores)]
-    for index in range(len(tasks)):
-        core_queues[individual[index]].append(tasks[index])
+    core_times = [0 for _ in range(total_cores)]
+    for index in range(len(new_tasks)):
+        core = individual[index]
+        core_queues[core].append(new_tasks[index])
+        new_tasks[index].core = core
+        new_tasks[index].start_time = core_times[core] + 0
+        exec_time = new_tasks[index].exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
+        core_times[core] += exec_time
+
+    for task in new_tasks:
+        for dep in task.deps:
+            dep_end_time = dep.start_time + dep.exec_time * (low_perf_multiplier if dep.core < total_cores / 2 else 1)
+            if task.start_time < dep_end_time:
+                task.start_time = dep_end_time
 
     score = 0
-    missed = 0
     for index in range(len(core_queues)):
-        qs, qm = fitness_for_queue(index, core_queues[index])
-        score += qs
-        missed += qm
+        score += fitness_for_queue(index, core_queues[index])
 
-    return score, missed
+    return score
 
 
 def grade(tasks, population):
@@ -123,15 +130,10 @@ def grade(tasks, population):
 
     """
     summed = 0
-    total_misses = 0
-    perfect_individuals = 0
     for individual in population:
-        score, missed = fitness(tasks, individual)
+        score = fitness(tasks, individual)
         summed += score
-        total_misses += missed
-        if missed == 0:
-            perfect_individuals += 1
-    return summed / (len(population) * 1.0), total_misses, perfect_individuals
+    return summed
 
 
 def crossover(father, mother):
@@ -150,39 +152,39 @@ def crossover(father, mother):
     return [mother[index] if gene_pool == 1 else father[index] for index in range(gene_size)]
 
 
-def evolve(population, retain=0.15, random_select=0.05, mutate=0.02):
-    graded = [(fitness(x), x) for x in population]
-    graded = [x[1] for x in sorted(graded)]
-    graded = graded[::-1]
+def evolve(tasks, population, retain=0.1, random_select=0.05, mutate=0.2):
+    graded = []
+    for individual in population:
+        graded.append((individual, fitness(tasks, individual)))
+
+    graded.sort(key=lambda tup: tup[1], reverse=True)
     retain_length = int(len(graded) * retain)
-    parents = graded[:retain_length]
+    parents = []
+    for item in graded[:retain_length]:
+        parents.append(item[0])
     # randomly add other individuals to
     # promote genetic diversity
-    for individual in graded[retain_length:]:
+    for item in graded[retain_length:]:
         if random_select > random():
-            parents.append(individual)
+            parents.append(item[0])
 
     # mutate some individuals
     for individual in parents:
         if mutate > random():
-            pos_to_mutate = randint(0, len(individual) - 1)
-            # this mutation is not ideal, because it
-            # restricts the range of possible values,
-            # but the function is unaware of the min/max
-            # values used to create the individuals,
-            individual[pos_to_mutate] = randint(0, total_cores - 1)
+            position = randrange(0, len(individual))
+            individual[position] = randrange(0, total_cores)  # todo: fix this
 
     # crossover parents to create children
     parents_length = len(parents)
     desired_length = len(population) - parents_length
     children = []
     while len(children) < desired_length:
-        male = randint(0, parents_length - 1)
-        female = randint(0, parents_length - 1)
-        if male != female:
-            male = parents[male]
-            female = parents[female]
-            child = crossover(male, female)
+        father = randint(0, parents_length - 1)
+        mother = randint(0, parents_length - 1)
+        if father != mother:
+            father = parents[father]
+            mother = parents[mother]
+            child = crossover(father, mother)
             children.append(child)
     parents.extend(children)
     return parents
@@ -207,6 +209,7 @@ def parse_tasks():
 
 
 def add_deadline():
+    tasks = []
     with open('robot.stg') as f:
         lines = f.readlines()
         size = int(lines[0])
@@ -225,7 +228,7 @@ def add_deadline():
         so_far = 0
         for task in tasks:
             if task.deps:
-                task.deadline = so_far / 4 + task.exec_time
+                task.deadline = so_far / 3 + task.exec_time
             else:
                 task.deadline = 2 * task.exec_time
             so_far += task.exec_time
@@ -242,16 +245,14 @@ def add_deadline():
 def main():
     # add_deadline()
     tasks = parse_tasks()
-    # indiv = create_individual(tasks)
-    population_size = 10
+    population_size = 200
     population = create_population(tasks, population_size)
-    print(population)
-    # fitness_history = [grade(tasks, population), ]
-    # for i in range(1000):
-    #     p = evolve(p)
-    #     g, m, pi = grade(p)
-    #     fitness_history.append((g, m, pi))
-    #     print(i + 1, g, m, pi)
+    fitness_history = [grade(tasks, population), ]
+    for i in range(250):
+        population = evolve(tasks, population)
+        g = grade(tasks, population)
+        fitness_history.append(g)
+        print('iteration {} score: {}'.format(i + 1, g))
 
 
 if __name__ == '__main__':
