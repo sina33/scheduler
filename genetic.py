@@ -84,13 +84,18 @@ def create_population(tasks, population_size):
 
 def fitness_for_queue(core, queue):
     score = 0
+    missed = 0
     for task in queue:
         exec_time = task.exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
-        if task.deadline > task.start_time + exec_time:
-            score -= 1000
+        delta = task.deadline - (task.start_time + exec_time)
+        if delta >= 0:
+            score += delta
         else:
-            score += task.deadline - task.start_time - exec_time
-    return score
+            score += 10 * min(delta, -100)
+            missed += 1
+            # print(task.id)
+
+    return score, missed
 
 
 def fitness(tasks, individual):
@@ -118,10 +123,13 @@ def fitness(tasks, individual):
                 task.start_time = dep_end_time
 
     score = 0
+    missed = 0
     for index in range(len(core_queues)):
-        score += fitness_for_queue(index, core_queues[index])
+        qs, qm = fitness_for_queue(index, core_queues[index])
+        score += qs
+        missed += qm
 
-    return score
+    return score, missed
 
 
 def grade(tasks, population):
@@ -129,11 +137,14 @@ def grade(tasks, population):
     Find average fitness for a population.
 
     """
-    summed = 0
+    score = 0
+    missed = 0
     for individual in population:
-        score = fitness(tasks, individual)
-        summed += score
-    return summed
+        ps, pm = fitness(tasks, individual)
+        score += ps
+        missed += pm
+
+    return score, missed
 
 
 def crossover(father, mother):
@@ -152,10 +163,11 @@ def crossover(father, mother):
     return [mother[index] if gene_pool == 1 else father[index] for index in range(gene_size)]
 
 
-def evolve(tasks, population, retain=0.1, random_select=0.05, mutate=0.2):
+def evolve(tasks, population, retain=0.2, random_select=0.05, mutate=0.15):
     graded = []
     for individual in population:
-        graded.append((individual, fitness(tasks, individual)))
+        individual_score, _ = fitness(tasks, individual)
+        graded.append((individual, individual_score))
 
     graded.sort(key=lambda tup: tup[1], reverse=True)
     retain_length = int(len(graded) * retain)
@@ -208,6 +220,17 @@ def parse_tasks():
     return tasks
 
 
+def get_min_deadline(task):
+    min_deadline = 0
+    if len(task.deps) == 0:
+        return task.exec_time
+
+    for dep in task.deps:
+        min_deadline = max(min_deadline, get_min_deadline(dep))
+
+    return min_deadline + task.exec_time
+
+
 def add_deadline():
     tasks = []
     with open('robot.stg') as f:
@@ -216,21 +239,18 @@ def add_deadline():
         lines = lines[1:]
         for index in range(size + 2):
             values = [int(x) for x in lines[index].split()]
-            t = Task()
-            t.id = values[0]
-            t.exec_time = values[1]
+            task = Task()
+            task.id = values[0]
+            task.exec_time = values[1]
             for j in range(values[2]):
-                t.deps.append(tasks[values[3 + j]])
-            tasks.append(t)
+                task.deps.append(tasks[values[3 + j]])
+            tasks.append(task)
 
     with open('deadline.stg', 'w') as o:
         print(size, file=o)
         so_far = 0
         for task in tasks:
-            if task.deps:
-                task.deadline = so_far / 3 + task.exec_time
-            else:
-                task.deadline = 2 * task.exec_time
+            task.deadline = int(1.2 * (max(get_min_deadline(task), so_far / 4)) + task.exec_time)
             so_far += task.exec_time
 
             print('{0: <6}'.format(task.id), end=' \t ', file=o)
@@ -243,16 +263,16 @@ def add_deadline():
 
 
 def main():
-    # add_deadline()
+    add_deadline()
     tasks = parse_tasks()
     population_size = 200
     population = create_population(tasks, population_size)
     fitness_history = [grade(tasks, population), ]
-    for i in range(250):
+    for i in range(1000):
         population = evolve(tasks, population)
-        g = grade(tasks, population)
-        fitness_history.append(g)
-        print('iteration {} score: {}'.format(i + 1, g))
+        score, missed = grade(tasks, population)
+        fitness_history.append(score)
+        print('iteration {} population: {} score: {} missed: {}'.format(i + 1, population_size, score, missed))
 
 
 if __name__ == '__main__':

@@ -1,13 +1,32 @@
-"""
-DM1
 
-Implementation of the Spectral Partition Algorithm
-"""
 import argparse
 import logging
 from collections import Counter
 
 import numpy as np
+
+
+def import_nodes_from_tg(tg_file):
+    edges = []
+    nodes = set()
+    nodes_map = dict()
+
+    with open(tg_file) as f:
+        lines = f.readlines()
+        nodes_size = int(lines[0]) + 2
+        adjacency_matrix = np.zeros((nodes_size, nodes_size))
+        for line in lines:
+            node = line.split()
+            node_id = int(node[0])
+            nodes.add(node_id)
+            nodes_map[node_id] = node_id
+            for i in range(4, len(node)):
+                edges.append((node_id, int(node[i])))
+                adjacency_matrix[int(node[0])][int(node[i])] = 1
+                adjacency_matrix[int(node[i])][int(node[0])] = 1
+
+    logging.info("Imported {} nodes with {} edges from {}".format(nodes_size, len(edges), tg_file))
+    return nodes, edges, adjacency_matrix, nodes_map
 
 
 def import_nodes(nodes_file):
@@ -89,24 +108,24 @@ def get_nodes(edges):
     return nodes
 
 
-def algorithm(nodes_file):
-    logging.warning("Computing Adjacency Matrix...")
+def partition_graph(nodes_file, tg=False):
+    logging.debug("Computing Adjacency Matrix...")
 
-    nodes, edges, adjacency_matrix, nodes_map = import_nodes(nodes_file)
+    nodes, edges, adjacency_matrix, nodes_map = import_nodes_from_tg(nodes_file) if tg else import_nodes(nodes_file)
     logging.debug("Adjacency matrix:\n", adjacency_matrix)
 
-    logging.warning("Computing the degree of each node...")
+    logging.debug("Computing the degree of each node...")
     degrees = degree_nodes(adjacency_matrix, len(nodes))
     logging.debug("Degrees: ", degrees)
 
-    logging.warning("Computing the Laplacian matrix...")
+    logging.debug("Computing the Laplacian matrix...")
     laplacian_matrix = np.diag(degrees) - adjacency_matrix
     logging.debug("Laplacian matrix:\n", laplacian_matrix)
 
-    logging.warning("Computing the eigenvectors and eigenvalues...")
+    logging.debug("Computing the eigenvectors and eigenvalues...")
     eigenvalues, eigenvectors = np.linalg.eigh(laplacian_matrix)
 
-    logging.info("Found eigenvalues: ", eigenvalues)
+    logging.debug("Found eigenvalues: ", eigenvalues)
 
     # Index of the second eigenvalue
     index_fnzev = np.argsort(eigenvalues)[1]
@@ -125,17 +144,12 @@ def algorithm(nodes_file):
 
     new_edges = get_min_cuts(edges, cut_edges)
     new_nodes = get_nodes(new_edges)
-    logging.warning('Remaining Edges: {} Cut Edges: {}'.format(len(new_edges), len(new_nodes)))
+    logging.debug('Remaining Edges: {} Cut Edges: {}'.format(len(new_edges), len(new_nodes)))
 
     cut_nodes = []
     for node in nodes:
         if node not in new_nodes:
             cut_nodes.append(node)
-
-    # for node in cut_nodes:
-    #     for key in nodes_map:
-    #         if nodes_map[key] == node:
-    #             print(key, degrees[node])
 
     new_part_1 = []
     new_part_2 = []
@@ -163,15 +177,15 @@ def algorithm(nodes_file):
         if edge[0] in new_part_2:
             edges_part_2.append(edge)
 
-    with open('part_1.txt', 'w') as file_1:
+    with open(nodes_file + '_1.edg', 'w') as file_1:
         for edge in edges_part_1:
             file_1.write(str(edge[0]) + ' ' + str(edge[1]) + '\n')
 
-    with open('part_2.txt', 'w') as file_2:
+    with open(nodes_file + '_2.edg', 'w') as file_2:
         for edge in edges_part_2:
             file_2.write(str(edge[0]) + ' ' + str(edge[1]) + '\n')
 
-    return len(nodes), edges
+    return len(part_1), len(part_2)
 
 
 def main():
@@ -183,13 +197,13 @@ def main():
                                                  "graph using the Spectral Partition Algorithm.")
 
     parser.add_argument('--nodes-file', '-f', help='the file containing the nodes',
-                        default='demo_nodes.txt')
+                        default='deadline.stg')
     parser.add_argument('--output-file', '-o', help='the filename of the'
                                                     ' communities PNG graph to be written')
 
     args = parser.parse_args()
 
-    number_nodes, edges = algorithm(args.nodes_file)
+    number_nodes, edges = partition_graph(args.nodes_file)
 
 
 if __name__ == '__main__':
