@@ -1,4 +1,3 @@
-
 import argparse
 import logging
 from collections import Counter
@@ -6,83 +5,23 @@ from collections import Counter
 import numpy as np
 
 
-def import_nodes_from_tg(tg_file):
-    edges = []
-    nodes = set()
-    nodes_map = dict()
-
-    with open(tg_file) as f:
-        lines = f.readlines()
-        nodes_size = int(lines[0]) + 2
-        adjacency_matrix = np.zeros((nodes_size, nodes_size))
-        for line in lines:
-            node = line.split()
-            node_id = int(node[0])
-            nodes.add(node_id)
-            nodes_map[node_id] = node_id
-            for i in range(4, len(node)):
-                edges.append((node_id, int(node[i])))
-                adjacency_matrix[int(node[0])][int(node[i])] = 1
-                adjacency_matrix[int(node[i])][int(node[0])] = 1
-
-    logging.info("Imported {} nodes with {} edges from {}".format(nodes_size, len(edges), tg_file))
-    return nodes, edges, adjacency_matrix, nodes_map
-
-
-def import_nodes(nodes_file):
-    """
-    Import the nodes from the file
-    """
-
-    edges = []
-    nodes = set()
-    nodes_map = dict()
-    latest_node = 0
-
-    with open(nodes_file) as f:
-        lines = f.readlines()
-        for line in lines:
-            v1, v2 = line.split()
-            if v1 not in nodes_map:
-                nodes_map[v1] = latest_node
-                nodes.add(latest_node)
-                latest_node += 1
-
-            if v2 not in nodes_map:
-                nodes_map[v2] = latest_node
-                nodes.add(latest_node)
-                latest_node += 1
-
-            edges.append((nodes_map[v1], nodes_map[v2]))
-
-    number_nodes = len(nodes)
-    logging.info("Imported {} nodes with {} edges from {}".format(number_nodes, len(edges), nodes_file))
-
-    adjacency_matrix = np.zeros((number_nodes, number_nodes))
-    for v1, v2 in edges:
-        adjacency_matrix[v1][v2] = 1
-        adjacency_matrix[v2][v1] = 1
-
-    return nodes, edges, adjacency_matrix, nodes_map
-
-
-def degree_nodes(adjacency_matrix, number_nodes):
+def degree_nodes(adjacency_matrix, total_nodes):
     """
     Compute the degree of each node
     Returns the vector of degrees
     """
 
     d = []
-    for i in range(number_nodes):
-        d.append(sum([adjacency_matrix[i][j] for j in range(number_nodes)]))
+    for i in range(total_nodes):
+        d.append(sum([adjacency_matrix[i][j] for j in range(total_nodes)]))
 
     return d
 
 
-def get_min_cuts(edges, edges_in_between):
-    logging.info('total edges {} in between {}'.format(len(edges), len(edges_in_between)))
+def get_min_cuts(edges, cut_edges):
+    logging.debug('total edges {} in between {}'.format(len(edges), len(cut_edges)))
     nodes = []
-    for v1, v2 in edges_in_between:
+    for v1, v2 in cut_edges:
         nodes.append(v1)
         nodes.append(v2)
     new_edges = []
@@ -91,7 +30,7 @@ def get_min_cuts(edges, edges_in_between):
         if v1 != node and v2 != node:
             new_edges.append((v1, v2))
     new_edges_in_between = []
-    for edge in edges_in_between:
+    for edge in cut_edges:
         if edge in new_edges:
             new_edges_in_between.append(edge)
     if len(new_edges_in_between) > 0:
@@ -108,44 +47,37 @@ def get_nodes(edges):
     return nodes
 
 
-def partition_graph(nodes_file, tg=False):
-    logging.debug("Computing Adjacency Matrix...")
-
-    nodes, edges, adjacency_matrix, nodes_map = import_nodes_from_tg(nodes_file) if tg else import_nodes(nodes_file)
-    logging.debug("Adjacency matrix:\n", adjacency_matrix)
-
-    logging.debug("Computing the degree of each node...")
-    degrees = degree_nodes(adjacency_matrix, len(nodes))
-    logging.debug("Degrees: ", degrees)
-
-    logging.debug("Computing the Laplacian matrix...")
-    laplacian_matrix = np.diag(degrees) - adjacency_matrix
-    logging.debug("Laplacian matrix:\n", laplacian_matrix)
-
-    logging.debug("Computing the eigenvectors and eigenvalues...")
-    eigenvalues, eigenvectors = np.linalg.eigh(laplacian_matrix)
-
-    logging.debug("Found eigenvalues: ", eigenvalues)
-
-    # Index of the second eigenvalue
-    index_fnzev = np.argsort(eigenvalues)[1]
-
-    logging.debug("Eigenvector for #{} eigenvalue ({}): ".format(
-        index_fnzev, eigenvalues[index_fnzev]), eigenvectors[:, index_fnzev])
-
-    partition = [val >= 0 for val in eigenvectors[:, index_fnzev]]
-    part_1 = [node for (node, nodeCommunity) in enumerate(partition) if nodeCommunity]
-    part_2 = [node for (node, nodeCommunity) in enumerate(partition) if not nodeCommunity]
+def get_cut_edges(edges, part_1, part_2):
     cut_edges = []
     for edge in edges:
         v1, v2 = edge
         if v1 in part_1 and v2 in part_2 or v1 in part_2 and v2 in part_1:
             cut_edges.append(edge)
+    return cut_edges
 
-    new_edges = get_min_cuts(edges, cut_edges)
-    new_nodes = get_nodes(new_edges)
-    logging.debug('Remaining Edges: {} Cut Edges: {}'.format(len(new_edges), len(new_nodes)))
 
+def import_nodes_from_tg(tg_file):
+    nodes = []
+    edges = []
+
+    with open(tg_file) as f:
+        lines = f.readlines()
+        total_nodes = int(lines[0]) + 2
+        adjacency_matrix = np.zeros((total_nodes, total_nodes), dtype=np.int)
+        for line in lines[1:]:
+            row = line.split()
+            node_id = int(row[0])
+            nodes.append(node_id)
+            for dep in row[4:]:
+                edges.append((node_id, int(dep)))
+                adjacency_matrix[node_id][int(dep)] = 1
+                adjacency_matrix[int(dep)][node_id] = 1
+
+    logging.info("Imported {} nodes with {} edges from {}".format(total_nodes, len(edges), tg_file))
+    return nodes, edges, adjacency_matrix, degree_nodes(adjacency_matrix, total_nodes), lines
+
+
+def prune(part_1, part_2, nodes, new_nodes):
     cut_nodes = []
     for node in nodes:
         if node not in new_nodes:
@@ -159,33 +91,67 @@ def partition_graph(nodes_file, tg=False):
     for node in part_2:
         if node not in cut_nodes:
             new_part_2.append(node)
+    return new_part_1, new_part_2, cut_nodes
 
-    logging.warning("Nodes in A: {} Nodes in B: {}".format(len(new_part_1), len(new_part_2)))
-    logging.warning("Partition computed: nbA={} nbB={} (total {}), {} edges in between, {} cut nodes".format(
+
+def get_deps(node, edges):
+    deps = []
+    for edge in edges:
+        v1, v2 = edge
+        if v1 == node and v2 < v1:
+            deps.append(v2)
+        elif v2 == node and v1 < v2:
+            deps.append(v1)
+    return deps
+
+
+def create_subgraph(part, edges, nodes_data, name):
+    with open(name, 'w') as file:
+        file.write(str(len(part)) + '\n')
+        for node in part:
+            node_data = nodes_data[node + 1].split()
+            file.write(str(node) + '\t\t' + node_data[1] + '\t\t' + node_data[2] + '\t\t')
+            deps = get_deps(node, edges)
+            file.write(str(len(deps)))
+            for dep in deps:
+                file.write('\t\t' + str(dep))
+            file.write('\n')
+
+
+def partition_graph(nodes_file):
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Computing Adjacency Matrix...")
+
+    nodes, edges, adjacency_matrix, degrees, nodes_data = import_nodes_from_tg(nodes_file)
+
+    logging.info("Computing the Laplacian matrix...")
+    laplacian_matrix = np.diag(degrees) - adjacency_matrix
+
+    logging.info("Computing the eigenvectors and eigenvalues...")
+    eigenvalues, eigenvectors = np.linalg.eigh(laplacian_matrix)
+
+    # Index of the second eigenvalue
+    index_fnzev = np.argsort(eigenvalues)[1]
+    logging.debug("Eigenvector for #{} eigenvalue ({}): ".format(
+        index_fnzev, eigenvalues[index_fnzev]), eigenvectors[:, index_fnzev])
+
+    partition = [val >= 0 for val in eigenvectors[:, index_fnzev]]
+    part_1 = [node for (node, nodeCommunity) in enumerate(partition) if nodeCommunity]
+    part_2 = [node for (node, nodeCommunity) in enumerate(partition) if not nodeCommunity]
+    cut_edges = get_cut_edges(edges, part_1, part_2)
+    edges = get_min_cuts(edges, cut_edges)
+    new_nodes = get_nodes(edges)
+    logging.info("Nodes in A: {} Nodes in B: {}".format(len(part_1), len(part_2)))
+
+    part_1, part_2, cut_nodes = prune(part_1, part_2, nodes, new_nodes)
+    logging.info("Partition computed: nbA={} nbB={} (total {}), {} edges in between, {} cut nodes".format(
         len(part_1),
         len(part_2),
         len(nodes),
         len(cut_edges),
         len(cut_nodes),
     ))
-
-    edges_part_1 = []
-    edges_part_2 = []
-    for edge in new_edges:
-        if edge[0] in new_part_1:
-            edges_part_1.append(edge)
-        if edge[0] in new_part_2:
-            edges_part_2.append(edge)
-
-    with open(nodes_file + '_1.edg', 'w') as file_1:
-        for edge in edges_part_1:
-            file_1.write(str(edge[0]) + ' ' + str(edge[1]) + '\n')
-
-    with open(nodes_file + '_2.edg', 'w') as file_2:
-        for edge in edges_part_2:
-            file_2.write(str(edge[0]) + ' ' + str(edge[1]) + '\n')
-
-    return len(part_1), len(part_2)
+    return part_1, part_2, nodes, edges, nodes_data
 
 
 def main():
@@ -203,7 +169,7 @@ def main():
 
     args = parser.parse_args()
 
-    number_nodes, edges = partition_graph(args.nodes_file)
+    partition_graph(args.nodes_file)
 
 
 if __name__ == '__main__':
