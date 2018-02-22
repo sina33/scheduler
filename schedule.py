@@ -24,15 +24,15 @@ def main():
 
     args = parser.parse_args()
 
-    part_1, part_2, nodes, edges, nodes_data = partition_graph(args.nodes_file)
-    create_subgraph(part_1, edges, nodes_data, 'part_1.stg')
-    create_subgraph(part_2, edges, nodes_data, 'part_2.stg')
-    part_1, part_2, nodes, edges, nodes_data = partition_graph('part_1.stg')
-    create_subgraph(part_1, edges, nodes_data, 'part_11.stg')
-    create_subgraph(part_2, edges, nodes_data, 'part_12.stg')
-    part_1, part_2, nodes, edges, nodes_data = partition_graph('part_2.stg')
-    create_subgraph(part_1, edges, nodes_data, 'part_21.stg')
-    create_subgraph(part_2, edges, nodes_data, 'part_22.stg')
+    part_1, part_2, nodes, edges, nodes_data, node_map = partition_graph(args.nodes_file)
+    create_subgraph(part_1, edges, nodes_data, node_map, 'part_1.stg')
+    create_subgraph(part_2, edges, nodes_data, node_map, 'part_2.stg')
+    part_1, part_2, nodes, edges, nodes_data, node_map = partition_graph('part_1.stg')
+    create_subgraph(part_1, edges, nodes_data, node_map, 'part_11.stg')
+    create_subgraph(part_2, edges, nodes_data, node_map, 'part_12.stg')
+    part_1, part_2, nodes, edges, nodes_data, node_map = partition_graph('part_2.stg')
+    create_subgraph(part_1, edges, nodes_data, node_map, 'part_21.stg')
+    create_subgraph(part_2, edges, nodes_data, node_map, 'part_22.stg')
 
 
 if __name__ == '__main__':

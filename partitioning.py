@@ -20,6 +20,9 @@ def degree_nodes(adjacency_matrix, total_nodes):
 
 def get_min_cuts(edges, cut_edges):
     logging.debug('total edges {} in between {}'.format(len(edges), len(cut_edges)))
+    if len(cut_edges) == 0:
+        return edges
+
     nodes = []
     for v1, v2 in cut_edges:
         nodes.append(v1)
@@ -59,22 +62,27 @@ def get_cut_edges(edges, part_1, part_2):
 def import_nodes_from_tg(tg_file):
     nodes = []
     edges = []
+    node_map = {}
 
     with open(tg_file) as f:
         lines = f.readlines()
-        total_nodes = int(lines[0]) + 2
-        adjacency_matrix = np.zeros((total_nodes, total_nodes), dtype=np.int)
-        for line in lines[1:]:
-            row = line.split()
-            node_id = int(row[0])
+        total_nodes = int(lines[0])
+        adjacency_matrix = np.zeros((total_nodes, total_nodes), dtype=int)
+        for index in range(1, len(lines)):
+            row = lines[index].split()
+            node_name = row[0]
+            node_id = index - 1
+            node_map[node_name] = node_id
             nodes.append(node_id)
+
             for dep in row[4:]:
-                edges.append((node_id, int(dep)))
-                adjacency_matrix[node_id][int(dep)] = 1
-                adjacency_matrix[int(dep)][node_id] = 1
+                dep_id = node_map[dep]
+                edges.append((node_id, dep_id))
+                adjacency_matrix[node_id][dep_id] = 1
+                adjacency_matrix[dep_id][node_id] = 1
 
     logging.info("Imported {} nodes with {} edges from {}".format(total_nodes, len(edges), tg_file))
-    return nodes, edges, adjacency_matrix, degree_nodes(adjacency_matrix, total_nodes), lines
+    return nodes, edges, adjacency_matrix, degree_nodes(adjacency_matrix, total_nodes), lines, node_map
 
 
 def prune(part_1, part_2, nodes, new_nodes):
@@ -94,24 +102,47 @@ def prune(part_1, part_2, nodes, new_nodes):
     return new_part_1, new_part_2, cut_nodes
 
 
-def get_deps(node, edges):
+def get_deps(node, edges, node_map):
     deps = []
+    dep_names = []
     for edge in edges:
         v1, v2 = edge
         if v1 == node and v2 < v1:
             deps.append(v2)
         elif v2 == node and v1 < v2:
             deps.append(v1)
-    return deps
+    for node in deps:
+        dep_names.append(get_node_name(node, node_map))
+    return dep_names
 
 
-def create_subgraph(part, edges, nodes_data, name):
+def get_node_name(node_id, node_map):
+    for key, value in node_map.items():
+        if str(value) == str(node_id):
+            return str(key)
+    # print("unable to find node {} in".format(node_id), node_map)
+    return 'ERROR'
+
+
+def create_subgraph(part, edges, nodes_data, node_map, name):
     with open(name, 'w') as file:
+        flag = False
+        if part[0] != 0:
+            part.insert(0, 0)
+            node_map['0'] = 0
+            nodes_data.insert(1, '0      	 0      	 0      	 0')
+            flag = True
+
         file.write(str(len(part)) + '\n')
         for node in part:
             node_data = nodes_data[node + 1].split()
-            file.write(str(node) + '\t\t' + node_data[1] + '\t\t' + node_data[2] + '\t\t')
-            deps = get_deps(node, edges)
+            file.write(get_node_name(node, node_map) + '\t\t' + node_data[1] + '\t\t' + node_data[2] + '\t\t')
+            deps = get_deps(node, edges, node_map)
+            if flag and node != 0:
+                if len(deps) != 0:
+                    flag = False
+                else:
+                    deps = [0]
             file.write(str(len(deps)))
             for dep in deps:
                 file.write('\t\t' + str(dep))
@@ -122,7 +153,7 @@ def partition_graph(nodes_file):
     logging.basicConfig(level=logging.INFO)
     logging.info("Computing Adjacency Matrix...")
 
-    nodes, edges, adjacency_matrix, degrees, nodes_data = import_nodes_from_tg(nodes_file)
+    nodes, edges, adjacency_matrix, degrees, nodes_data, node_map = import_nodes_from_tg(nodes_file)
 
     logging.info("Computing the Laplacian matrix...")
     laplacian_matrix = np.diag(degrees) - adjacency_matrix
@@ -151,7 +182,7 @@ def partition_graph(nodes_file):
         len(cut_edges),
         len(cut_nodes),
     ))
-    return part_1, part_2, nodes, edges, nodes_data
+    return part_1, part_2, nodes, edges, nodes_data, node_map
 
 
 def main():
