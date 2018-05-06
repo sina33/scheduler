@@ -7,8 +7,12 @@ import numpy as np
 
 def degree_nodes(adjacency_matrix, total_nodes):
     """
-    Compute the degree of each node
-    Returns the vector of degrees
+    compute the degree of each node
+    returns the vector of degrees
+
+    :param adjacency_matrix: adjacency matrix of edges
+    :param total_nodes: list of all nodes
+    :return:
     """
 
     d = []
@@ -19,6 +23,15 @@ def degree_nodes(adjacency_matrix, total_nodes):
 
 
 def get_min_cuts(edges, cut_edges):
+    """
+    recursively calculates the minimum node cuts to eliminate dependency between partitions
+    returns list of all not cut edges
+
+    :param edges: list of all edges
+    :param cut_edges: list of cut edges
+    :return:
+    """
+
     logging.debug('total edges {} in between {}'.format(len(edges), len(cut_edges)))
     if len(cut_edges) == 0:
         return edges
@@ -43,6 +56,13 @@ def get_min_cuts(edges, cut_edges):
 
 
 def get_nodes(edges):
+    """
+    returns all nodes that were in the list of edges
+
+    :param edges: list of edges
+    :return:
+    """
+
     nodes = set()
     for v1, v2 in edges:
         nodes.add(v1)
@@ -51,6 +71,15 @@ def get_nodes(edges):
 
 
 def get_cut_edges(edges, part_1, part_2):
+    """
+    returns list of cut edges
+
+    :param edges: list of all edges
+    :param part_1: nodes in part A
+    :param part_2: nodes in part B
+    :return:
+    """
+
     cut_edges = []
     for edge in edges:
         v1, v2 = edge
@@ -60,6 +89,19 @@ def get_cut_edges(edges, part_1, part_2):
 
 
 def import_nodes_from_tg(tg_file):
+    """
+    node file parser
+    nodes: is the list of nodes that are named 1:n
+    edges: is the list of edges using the names in nodes
+    adjacency_matrix: adjacency matrix of edges
+    degrees: list of nodes degrees
+    lines: strings in node file
+    node_map: nodes dict, keys are the real name of nodes in task graph and values are their name in nodes list
+
+    :param tg_file: task graph file
+    :return:
+    """
+
     nodes = []
     edges = []
     node_map = {}
@@ -86,6 +128,16 @@ def import_nodes_from_tg(tg_file):
 
 
 def prune(part_1, part_2, nodes, new_nodes):
+    """
+    removes cut nodes and edges
+
+    :param part_1: nodes in part A
+    :param part_2: nodes in part B
+    :param nodes: list of all nodes
+    :param new_nodes: list of nodes that are not cut
+    :return:
+    """
+
     cut_nodes = []
     for node in nodes:
         if node not in new_nodes:
@@ -103,6 +155,15 @@ def prune(part_1, part_2, nodes, new_nodes):
 
 
 def get_deps(node, edges, node_map):
+    """
+    returns dependencies of a node
+
+    :param node: node
+    :param edges: list of edges
+    :param node_map: nodes dict
+    :return:
+    """
+
     deps = []
     dep_names = []
     for edge in edges:
@@ -117,14 +178,31 @@ def get_deps(node, edges, node_map):
 
 
 def get_node_name(node_id, node_map):
+    """
+    gets node name from nodes dictionary
+
+    :param node_id: node_id
+    :param node_map: input dict
+    :return:
+    """
+
     for key, value in node_map.items():
         if str(value) == str(node_id):
             return str(key)
-    # print("unable to find node {} in".format(node_id), node_map)
     return 'ERROR'
 
 
 def create_subgraph(part, edges, nodes_data, node_map, name):
+    """
+    creates a subgraph using nodes that are in part and writes it to file
+
+    :param part:
+    :param edges:
+    :param nodes_data:
+    :param node_map:
+    :param name:
+    :return:
+    """
     with open(name, 'w') as file:
         flag = False
         if part[0] != 0:
@@ -150,6 +228,14 @@ def create_subgraph(part, edges, nodes_data, node_map, name):
 
 
 def partition_graph(nodes_file):
+    """
+    partitions graph
+    returns list of nodes in two parts, list of nodes, list of edges, nodes_data and nodes dict
+
+    :param nodes_file:
+    :return:
+    """
+
     logging.basicConfig(level=logging.INFO)
     logging.info("Computing Adjacency Matrix...")
 
@@ -169,19 +255,19 @@ def partition_graph(nodes_file):
     partition = [val >= 0 for val in eigenvectors[:, index_fnzev]]
     part_1 = [node for (node, nodeCommunity) in enumerate(partition) if nodeCommunity]
     part_2 = [node for (node, nodeCommunity) in enumerate(partition) if not nodeCommunity]
-    cut_edges = get_cut_edges(edges, part_1, part_2)
-    edges = get_min_cuts(edges, cut_edges)
-    new_nodes = get_nodes(edges)
+    # cut_edges = get_cut_edges(edges, part_1, part_2)
+    # edges = get_min_cuts(edges, cut_edges)
+    # new_nodes = get_nodes(edges)
     logging.info("Nodes in A: {} Nodes in B: {}".format(len(part_1), len(part_2)))
 
-    part_1, part_2, cut_nodes = prune(part_1, part_2, nodes, new_nodes)
-    logging.info("Partition computed: nbA={} nbB={} (total {}), {} edges in between, {} cut nodes".format(
-        len(part_1),
-        len(part_2),
-        len(nodes),
-        len(cut_edges),
-        len(cut_nodes),
-    ))
+    # part_1, part_2, cut_nodes = prune(part_1, part_2, nodes, new_nodes)
+    # logging.info("Partition computed: nbA={} nbB={} (total {}), {} edges in between, {} cut nodes".format(
+    #     len(part_1),
+    #     len(part_2),
+    #     len(nodes),
+    #     len(cut_edges),
+    #     len(cut_nodes),
+    # ))
     return part_1, part_2, nodes, edges, nodes_data, node_map
 
 
