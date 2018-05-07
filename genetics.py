@@ -42,7 +42,7 @@ class CoreQueue:
 
 def get_core_for_task(task, low_percent):
     if random() < low_percent:
-        return task.tg_id
+        return randrange(0, total_cores / 2)
     return randrange(total_cores / 2, total_cores)
 
 
@@ -99,14 +99,14 @@ def fitness(tasks, individual):
         core_queues[core].append(new_tasks[index])
         new_tasks[index].core = core
         new_tasks[index].start_time = core_times[core] + 0
-        exec_time = new_tasks[index].exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
-        core_times[core] += exec_time
-
-    for task in new_tasks:
-        for dep in task.deps:
+        for dep in new_tasks[index].deps:
             dep_end_time = dep.start_time + dep.exec_time * (low_perf_multiplier if dep.core < total_cores / 2 else 1)
-            if task.start_time < dep_end_time:
-                task.start_time = dep_end_time
+            if new_tasks[index].start_time < dep_end_time:
+                new_tasks[index].start_time = dep_end_time
+        exec_time = new_tasks[index].exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
+        core_times[core] += new_tasks[index].start_time + exec_time
+
+    # for task in new_tasks:
 
     score = 0
     missed = 0
@@ -146,7 +146,7 @@ def crossover(father, mother):
             changed += 1
             gene_pool[position] = 1
 
-    return [mother[index] if gene_pool == 1 else father[index] for index in range(gene_size)]
+    return [mother[index] if gene_pool[index] == 1 else father[index] for index in range(gene_size)]
 
 
 def evolve(tasks, population, retain=0.2, random_select=0.05, mutate=0.15):
@@ -248,7 +248,7 @@ def add_deadline():
         print(size, file=o)
         so_far = 0
         for task in tasks:
-            task.deadline = int(1.2 * (max(get_min_deadline(task), so_far / 2)) + task.exec_time)
+            task.deadline = int(1.5 * (max(get_min_deadline(task), so_far / 2)) + task.exec_time)
             so_far += task.exec_time
 
             print('{0: <6}'.format(task.id), end=' \t ', file=o)
