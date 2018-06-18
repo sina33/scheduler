@@ -51,7 +51,7 @@ def create_individual(tasks, low_percent=0.75):
     Create a member of the population.
 
     """
-    schedule = [0 for _ in range(len(tasks))]
+    schedule = [-1 for _ in range(len(tasks))]
     for task in tasks:
         schedule[task.id] = get_core_for_task(task, low_percent)
 
