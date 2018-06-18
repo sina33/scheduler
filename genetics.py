@@ -84,29 +84,32 @@ def fitness_for_queue(core, queue):
     return score, missed
 
 
-def fitness(tasks, individual):
+def get_individual_fitness(tasks, individual):
     """
     Determine the fitness of an individual. Higher is better.
-
     individual: the individual to evaluate
     """
     new_tasks = copy.deepcopy(tasks)
 
     core_queues = [[] for _ in range(total_cores)]
     core_times = [0 for _ in range(total_cores)]
+    # for each scheduled task do this
     for index in range(len(new_tasks)):
+        # find the targeted core
         core = individual[index]
+        # append the task to the targeted core_queue
         core_queues[core].append(new_tasks[index])
         new_tasks[index].core = core
-        new_tasks[index].start_time = core_times[core] + 0
+        # set the task's start_time to core's current time
+        new_tasks[index].start_time = core_times[core] + 1
         for dep in new_tasks[index].deps:
+            # calculate end_time for task's dependencies
             dep_end_time = dep.start_time + dep.exec_time * (low_perf_multiplier if dep.core < total_cores / 2 else 1)
+            # check if dep end_time is already passed
             if new_tasks[index].start_time < dep_end_time:
                 new_tasks[index].start_time = dep_end_time
         exec_time = new_tasks[index].exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
         core_times[core] += new_tasks[index].start_time + exec_time
-
-    # for task in new_tasks:
 
     score = 0
     missed = 0
