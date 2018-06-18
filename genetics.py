@@ -74,9 +74,9 @@ def fitness_for_queue(core, queue):
     for task in queue:
         exec_time = task.exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
         delta = task.deadline - (task.start_time + exec_time)
-        if delta >= 0:
+        if delta >= 0:  # deadline met
             score += delta
-        else:
+        else:           # deadline missed
             score -= 10 * max(abs(delta), 100)
             missed += 1
             # print(task.id)
