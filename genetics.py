@@ -278,8 +278,11 @@ def main():
     population_size = 200
     population = create_population(tasks, population_size)
     fitness_history = [grade(tasks, population), ]
+    fitness, _ = get_population_fitness(tasks, population)
     for i in range(1000):
-        population = evolve(tasks, population)
+        population = evolve(tasks, population, fitness)
+        fitness, _ = get_population_fitness(tasks, population)
+
         score, missed = grade(tasks, population)
         fitness_history.append(score)
         print('iteration {} population: {} score: {} missed: {}'.format(i + 1, population_size, score, missed))
