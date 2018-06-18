@@ -130,11 +130,10 @@ def get_population_fitness(tasks, population):
         misses.append(miss)
     return scores, misses
 
-    
+
 def grade(tasks, population):
     """
     Find average fitness for a population.
-
     """
     score = 0
     missed = 0
@@ -162,11 +161,11 @@ def crossover(father, mother):
     return [mother[index] if gene_pool[index] == 1 else father[index] for index in range(gene_size)]
 
 
-def evolve(tasks, population, retain=0.2, random_select=0.05, mutate=0.15):
+def evolve(tasks, population, fitness, retain=0.2, random_select=0.05, mutate=0.15):
     graded = []
-    for individual in population:
-        individual_score, _ = get_individual_fitness(tasks, individual)
-        graded.append((individual, individual_score))
+    for idx, individual in enumerate(population):
+        # individual_score, _ = get_individual_fitness(tasks, individual)
+        graded.append((individual, fitness[idx]))
 
     graded.sort(key=lambda tup: tup[1], reverse=True)
     retain_length = int(len(graded) * retain)
