@@ -121,6 +121,16 @@ def get_individual_fitness(tasks, individual):
     return score, missed
 
 
+def get_population_fitness(tasks, population):
+    scores = list()
+    misses = list()
+    for individual in population:
+        score, miss = get_individual_fitness(tasks, individual)
+        scores.append(score)
+        misses.append(miss)
+    return scores, misses
+
+    
 def grade(tasks, population):
     """
     Find average fitness for a population.
