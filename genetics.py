@@ -109,7 +109,7 @@ def get_individual_fitness(tasks, individual):
             if new_tasks[index].start_time < dep_end_time:
                 new_tasks[index].start_time = dep_end_time
         exec_time = new_tasks[index].exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
-        core_times[core] += new_tasks[index].start_time + exec_time
+        core_times[core] = new_tasks[index].start_time + exec_time
 
     score = 0
     missed = 0
