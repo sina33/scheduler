@@ -77,7 +77,7 @@ def fitness_for_queue(core, queue):
         if delta >= 0:
             score += delta
         else:
-            score += 10 * min(delta, -100)
+            score -= 10 * max(abs(delta), 100)
             missed += 1
             # print(task.id)
 
