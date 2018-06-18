@@ -273,19 +273,23 @@ def add_deadline():
 
 
 def main():
-    # add_deadline()
     tasks = parse_tasks()
     population_size = 200
+    tot_generations = 500
+    print("population: {}  total generations: {}".format(population_size, tot_generations))
     population = create_population(tasks, population_size)
-    fitness_history = [grade(tasks, population), ]
     fitness, _ = get_population_fitness(tasks, population)
-    for i in range(1000):
-        population = evolve(tasks, population, fitness)
-        fitness, _ = get_population_fitness(tasks, population)
+    fitness_history = [grade(tasks, population), ]
 
-        score, missed = grade(tasks, population)
+    for i in range(tot_generations):
+        population = evolve(tasks, population, fitness)
+        fitness, missed = get_population_fitness(tasks, population)
+
+        # score, missed = grade(tasks, population)
+        score = max(fitness)
+        missed = sum(missed)/len(missed)
         fitness_history.append(score)
-        print('iteration {} population: {} score: {} missed: {}'.format(i + 1, population_size, score, missed))
+        print('iteration {} score: {} avg_missed: {}'.format(i + 1, score, missed))
 
 
 if __name__ == '__main__':
