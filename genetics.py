@@ -286,32 +286,47 @@ def plot(history_max, history_min, history_avg, tot_generations):
         #plt.ylim((-100,+100))
         plt.ylabel('Fitness', fontsize=15)
         plt.xlabel('Generation', fontsize=15)
-        # print("Saving the image in './fitness.jpg'...")
-        # plt.savefig("./fitness.jpg", dpi=500)
-        plt.show()
+        print("Saving the image in './fitness.jpg'...")
+        plt.savefig("./fitness.jpg", dpi=500)
+        # plt.show()
     except ImportError:
         print("Please install matplotlib if you want to see the fitness/generation plot.")
         pass # module doesn't exist, deal with it.
 
 
 def main():
+    fitness_mean_history = list()
+    fitness_min_history = list()
+    fitness_max_history = list()
     tasks = parse_tasks()
     population_size = 200
-    tot_generations = 500
+    tot_generations = 50
     print("population: {}  total generations: {}".format(population_size, tot_generations))
     population = create_population(tasks, population_size)
     fitness, _ = get_population_fitness(tasks, population)
-    fitness_history = [grade(tasks, population), ]
+
+    # fitness_history = [grade(tasks, population), ]
+    fitness_max_history.append( max(fitness) )
+    fitness_min_history.append( min(fitness) )
+    fitness_mean_history.append( sum(fitness)/len(fitness) )
 
     for i in range(tot_generations):
         population = evolve(tasks, population, fitness)
         fitness, missed = get_population_fitness(tasks, population)
-
+        
+        fitness_max_history.append( max(fitness) )
+        fitness_min_history.append( min(fitness) )
+        fitness_mean_history.append( sum(fitness)/len(fitness) )
         # score, missed = grade(tasks, population)
         score = max(fitness)
         missed = sum(missed)/len(missed)
-        fitness_history.append(score)
-        print('iteration {} score: {} avg_missed: {}'.format(i + 1, score, missed))
+        # fitness_history.append(score)
+        print('iteration {} max_score: {} avg_missed: {}'.format(i + 1, score, missed))
+    
+    plot(fitness_max_history[0:-1],
+                fitness_min_history[0:-1], 
+                fitness_mean_history[0:-1],
+                tot_generations)
 
 
 if __name__ == '__main__':
