@@ -142,7 +142,7 @@ def grade(tasks, population):
         score += ps
         missed += pm
 
-    return score, missed
+    return score/len(population), missed/len(population)
 
 
 def crossover(father, mother):
