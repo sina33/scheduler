@@ -272,6 +272,28 @@ def add_deadline():
             print('', file=o)
 
 
+def plot(history_max, history_min, history_avg, tot_generations):
+    import numpy as np
+    try:
+        import matplotlib.pyplot as plt
+        print("Using matplotlib to show the fitness/generation plot...")
+        array = np.arange(1, tot_generations+1, dtype='int32')
+        plt.plot(array, history_avg, color='blue', marker='^', markersize=6, markevery=10, label='Mean')
+        plt.plot(array, history_min, color='yellow', marker='^', markersize=6, markevery=10, label='Min')
+        plt.plot(array, history_max, color='red', marker='^', markersize=6, markevery=10, label='Max')
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
+        #plt.xlim((0,tot_generations))
+        #plt.ylim((-100,+100))
+        plt.ylabel('Fitness', fontsize=15)
+        plt.xlabel('Generation', fontsize=15)
+        # print("Saving the image in './fitness.jpg'...")
+        # plt.savefig("./fitness.jpg", dpi=500)
+        plt.show()
+    except ImportError:
+        print("Please install matplotlib if you want to see the fitness/generation plot.")
+        pass # module doesn't exist, deal with it.
+
+
 def main():
     tasks = parse_tasks()
     population_size = 200
