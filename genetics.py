@@ -129,7 +129,7 @@ def grade(tasks, population):
     score = 0
     missed = 0
     for individual in population:
-        ps, pm = fitness(tasks, individual)
+        ps, pm = get_individual_fitness(tasks, individual)
         score += ps
         missed += pm
 
@@ -155,7 +155,7 @@ def crossover(father, mother):
 def evolve(tasks, population, retain=0.2, random_select=0.05, mutate=0.15):
     graded = []
     for individual in population:
-        individual_score, _ = fitness(tasks, individual)
+        individual_score, _ = get_individual_fitness(tasks, individual)
         graded.append((individual, individual_score))
 
     graded.sort(key=lambda tup: tup[1], reverse=True)
@@ -202,7 +202,7 @@ def get_tasks_from_file(file_name):
 
 def parse_tasks(task_file='deadline.stg'):
     tasks = []
-    tg_1 = get_tasks_from_file('part_1.stg')
+    tg_1 = get_tasks_from_file(task_file)
 
     with open(task_file) as f:
         lines = f.readlines()
