@@ -247,9 +247,14 @@ def get_min_deadline(task):
     return min_deadline + task.exec_time
 
 
-def add_deadline():
+def add_deadline(src, dst='deadline.stg'):
+    '''
+    Standard Task Graph Sets are obtained from:
+    http://www.kasahara.elec.waseda.ac.jp/schedule/
+    this function appends a deadline column to stg files
+    '''
     tasks = []
-    with open('robot.stg') as f:
+    with open(src) as f:
         lines = f.readlines()
         size = int(lines[0])
         lines = lines[1:]
@@ -262,7 +267,7 @@ def add_deadline():
                 task.deps.append(tasks[values[3 + j]])
             tasks.append(task)
 
-    with open('deadline.stg', 'w') as o:
+    with open(dst, 'w') as o:
         print(size, file=o)
         so_far = 0
         for task in tasks:
@@ -301,6 +306,7 @@ def plot(history_max, history_min, history_avg, tot_generations):
 
 
 def main():
+    add_deadline(src='stg/fpppp', dst='deadline.stg')
     fitness_mean_history = list()
     fitness_min_history = list()
     fitness_max_history = list()
