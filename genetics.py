@@ -210,6 +210,12 @@ def get_tasks_from_file(file_name):
 
 
 def parse_tasks(task_file='deadline.stg'):
+    '''
+    task graph file format:
+    first line consists of only one value: number of nodes
+    each of the following lines consists of tab separated values.
+    id, exec_time, deadline, list of dependencies
+    '''
     tasks = []
     tg_1 = get_tasks_from_file(task_file)
 
