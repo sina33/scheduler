@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import copy
 from random import randint, random, randrange
+from functools import reduce
 
 total_cores = 4
 low_perf_multiplier = 2
@@ -85,6 +86,29 @@ def fitness_for_queue(core, queue):
             # print(task.id)
 
     return score, missed
+
+
+def get_makespan(tasks, schedule):
+    new_tasks = copy.deepcopy(tasks)
+    core_queues = [[] for _ in range(total_cores)]
+    core_times = [0 for _ in range(total_cores)]
+    for index in range(len(new_tasks)):
+        # find the targeted core
+        core = schedule[index]
+        # append the task to the targeted core_queue
+        core_queues[core].append(new_tasks[index])
+        new_tasks[index].core = core
+        # set the task's start_time to core's current time
+        new_tasks[index].start_time = core_times[core] + 1
+        for dep in new_tasks[index].deps:
+            # calculate end_time for task's dependencies
+            dep_end_time = dep.start_time + dep.exec_time * (low_perf_multiplier if dep.core < total_cores / 2 else 1)
+            # check if dep end_time is already passed
+            if new_tasks[index].start_time < dep_end_time:
+                new_tasks[index].start_time = dep_end_time
+        exec_time = new_tasks[index].exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
+        core_times[core] = new_tasks[index].start_time + exec_time
+    return max(core_times)
 
 
 def get_individual_fitness(tasks, individual):
@@ -335,8 +359,9 @@ def main():
         # score, missed = grade(tasks, population)
         score = max(fitness)
         missed = sum(missed)/len(missed)
+        makespan = get_makespan(tasks, population[maxl(fitness)])
         # fitness_history.append(score)
-        print('iteration {} max_score: {} avg_missed: {}'.format(i + 1, score, missed))
+        print('iteration {} max_score: {} avg_missed: {} makespan: {}'.format(i + 1, score, missed, makespan))
     
     plot(fitness_max_history[0:-1],
                 fitness_min_history[0:-1], 
