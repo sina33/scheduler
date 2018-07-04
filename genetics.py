@@ -6,6 +6,11 @@ from random import randint, random, randrange
 total_cores = 4
 low_perf_multiplier = 2
 
+# Gets the index of maximum element in a list. If a conflict occurs, the index of the last largest is returned
+def maxl(l): return l.index(reduce(lambda x,y: max(x,y), l))
+
+# Gets the index of minimum element in a list. If a conflict occurs, the index of the last smallest is returned
+def minl(l): return l.index(reduce(lambda x,y: min(x,y), l))
 
 class Task:
     def __init__(self):
@@ -49,7 +54,6 @@ def get_core_for_task(task, low_percent):
 def create_individual(tasks, low_percent=0.75):
     """
     Create a member of the population.
-
     """
     schedule = [-1 for _ in range(len(tasks))]
     for task in tasks:
@@ -63,7 +67,6 @@ def create_population(tasks, population_size):
     Create a number of individuals (i.e. a population).
     tasks: data structure holding tasks
     count: the number of individuals in the population
-
     """
     return [create_individual(tasks) for _ in range(population_size)]
 
