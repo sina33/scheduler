@@ -310,20 +310,34 @@ def add_deadline(src, dst='deadline.stg'):
             print('', file=o)
 
 
-def plot(history_max, history_min, history_avg, tot_generations):
+def plot(history_max, history_min, history_avg, makespans, tot_generations):
     import numpy as np
     try:
         import matplotlib.pyplot as plt
         print("Using matplotlib to show the fitness/generation plot...")
         array = np.arange(1, tot_generations+1, dtype='int32')
-        plt.plot(array, history_avg, color='blue', marker='^', markersize=6, markevery=10, label='Mean')
-        plt.plot(array, history_min, color='yellow', marker='^', markersize=6, markevery=10, label='Min')
-        plt.plot(array, history_max, color='red', marker='^', markersize=6, markevery=10, label='Max')
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
+
+        fig, ax1 = plt.subplots()
+
+        ax1.set_xlabel('generation (#)')
+        ax1.set_ylabel('fitness')
+        ax1.plot(array, history_avg, color='blue', marker='^', markersize=6, markevery=10, label='Mean')
+        ax1.plot(array, history_min, color='yellow', marker='^', markersize=6, markevery=10, label='Min')
+        ax1.plot(array, history_max, color='red', marker='^', markersize=6, markevery=10, label='Max')
+        ax1.tick_params(axis='y', labelcolor='tab:red')
+        ax1.legend(loc='lower center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
         #plt.xlim((0,tot_generations))
         #plt.ylim((-100,+100))
-        plt.ylabel('Fitness', fontsize=15)
-        plt.xlabel('Generation', fontsize=15)
+        # ax1.ylabel('Fitness', fontsize=15)
+        # ax1.xlabel('Generation', fontsize=15)
+
+        ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
+        ax2.set_ylabel('makespan (s)')
+        ax2.plot(array, makespans, color='black', marker='^', markersize=6, markevery=10, label='Makespan')
+        ax2.tick_params(axis='y')
+
+        fig.tight_layout()  # otherwise the right y-label is slightly clipped
+
         print("Saving the image in './fitness.jpg'...")
         plt.savefig("./fitness.jpg", dpi=500)
         # plt.show()
@@ -333,10 +347,11 @@ def plot(history_max, history_min, history_avg, tot_generations):
 
 
 def main():
-    add_deadline(src='stg/fpppp', dst='deadline.stg')
+    add_deadline(src='stg/sparse', dst='deadline.stg')
     fitness_mean_history = list()
     fitness_min_history = list()
     fitness_max_history = list()
+    makespan_history = list()
     tasks = parse_tasks()
     population_size = 200
     tot_generations = 50
@@ -361,11 +376,13 @@ def main():
         missed = sum(missed)/len(missed)
         makespan = get_makespan(tasks, population[maxl(fitness)])
         # fitness_history.append(score)
+        makespan_history.append(makespan)
         print('iteration {} max_score: {} avg_missed: {} makespan: {}'.format(i + 1, score, missed, makespan))
     
     plot(fitness_max_history[0:-1],
                 fitness_min_history[0:-1], 
                 fitness_mean_history[0:-1],
+                makespan_history,
                 tot_generations)
 
 
