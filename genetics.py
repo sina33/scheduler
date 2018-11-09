@@ -75,16 +75,18 @@ def create_population(tasks, population_size):
 def fitness_for_queue(core, queue):
     score = 0
     missed = 0
+    sum_exec_time = 0
     for task in queue:
         exec_time = task.exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
+        sum_exec_time += exec_time
         delta = task.deadline - (task.start_time + exec_time)
         if delta >= 0:  # deadline met
-            score += delta
+            score += delta 
         else:           # deadline missed
             score -= 10 * max(abs(delta), 100)
             missed += 1
             # print(task.id)
-
+        # score += (sum_exec_time if core < total_cores / 2 else 0)
     return score, missed
 
 
@@ -108,7 +110,14 @@ def get_makespan(tasks, schedule):
                 new_tasks[index].start_time = dep_end_time
         exec_time = new_tasks[index].exec_time * (low_perf_multiplier if core < total_cores / 2 else 1)
         core_times[core] = new_tasks[index].start_time + exec_time
-    return max(core_times)
+
+        # total execution time on each core        
+        core_exec_sum = [0 for _ in range(total_cores)]
+        for core, queue in enumerate(core_queues):
+            for task in queue:
+                core_exec_sum[core] += task.exec_time
+
+    return max(core_times), core_exec_sum
 
 
 def get_individual_fitness(tasks, individual):
@@ -346,6 +355,8 @@ def plot(history_max, history_min, history_avg, makespans, tot_generations):
         pass # module doesn't exist, deal with it.
 
 
+
+
 def main():
     add_deadline(src='stg/sparse', dst='deadline.stg')
     fitness_mean_history = list()
@@ -364,6 +375,8 @@ def main():
     fitness_min_history.append( min(fitness) )
     fitness_mean_history.append( sum(fitness)/len(fitness) )
 
+    core_exec_sum = list()
+
     for i in range(tot_generations):
         population = evolve(tasks, population, fitness)
         fitness, missed = get_population_fitness(tasks, population)
@@ -374,16 +387,19 @@ def main():
         # score, missed = grade(tasks, population)
         score = max(fitness)
         missed = sum(missed)/len(missed)
-        makespan = get_makespan(tasks, population[maxl(fitness)])
+        makespan, core_exec_sum = get_makespan(tasks, population[maxl(fitness)])
         # fitness_history.append(score)
         makespan_history.append(makespan)
         print('iteration {} max_score: {} avg_missed: {} makespan: {}'.format(i + 1, score, missed, makespan))
-    
+
     plot(fitness_max_history[0:-1],
                 fitness_min_history[0:-1], 
                 fitness_mean_history[0:-1],
                 makespan_history,
                 tot_generations)
+
+    print("totla execution time on each core: %s" % core_exec_sum)
+
 
 
 if __name__ == '__main__':
