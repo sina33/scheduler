@@ -86,7 +86,7 @@ def fitness_for_queue(core, queue):
             score -= 10 * max(abs(delta), 100)
             missed += 1
             # print(task.id)
-        # score += (sum_exec_time if core < total_cores / 2 else 0)
+    # score += (sum_exec_time*2 if core < total_cores / 2 else 0)
     return score, missed
 
 
@@ -358,7 +358,7 @@ def plot(history_max, history_min, history_avg, makespans, tot_generations):
 
 
 def main():
-    add_deadline(src='stg/sparse', dst='deadline.stg')
+    add_deadline(src='gaussian_elimination.stg', dst='deadline.stg')
     fitness_mean_history = list()
     fitness_min_history = list()
     fitness_max_history = list()
@@ -392,13 +392,14 @@ def main():
         makespan_history.append(makespan)
         print('iteration {} max_score: {} avg_missed: {} makespan: {}'.format(i + 1, score, missed, makespan))
 
+    print("totla execution time on each core: %s" % core_exec_sum)
+    
     plot(fitness_max_history[0:-1],
                 fitness_min_history[0:-1], 
                 fitness_mean_history[0:-1],
                 makespan_history,
                 tot_generations)
 
-    print("totla execution time on each core: %s" % core_exec_sum)
 
 
 
