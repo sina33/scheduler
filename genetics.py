@@ -3,6 +3,9 @@ from __future__ import print_function
 import copy
 from random import randint, random, randrange
 from functools import reduce
+import logging
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+logging.basicConfig(level=logging.INFO)
 
 total_cores = 4
 low_perf_multiplier = 2
@@ -24,12 +27,15 @@ class Task:
         self.tg_id = 0
 
     def __repr__(self):
-        return 'id: {} core: {} start_time: {} exec_time: {}'.format(
-            self.id,
-            self.core,
-            self.start_time,
-            self.exec_time
-        )
+        if self.core == -1:
+            return 'id: {} exec_time: {} deps: {}'.format(
+                self.id,
+                self.exec_time,
+                [t.id for t in self.deps]
+            )
+        else:
+           exec_time = self.exec_time * (low_perf_multiplier if self.core < total_cores / 2 else 1)
+           return '{}: ({}, {})'.format(self.id, self.start_time, self.start_time+exec_time)
 
 
 class Job:
@@ -90,7 +96,7 @@ def fitness_for_queue(core, queue):
     return score, missed
 
 
-def get_makespan(tasks, schedule):
+def get_makespan(tasks, schedule, print_out=False):
     new_tasks = copy.deepcopy(tasks)
     core_queues = [[] for _ in range(total_cores)]
     core_times = [0 for _ in range(total_cores)]
@@ -101,7 +107,7 @@ def get_makespan(tasks, schedule):
         core_queues[core].append(new_tasks[index])
         new_tasks[index].core = core
         # set the task's start_time to core's current time
-        new_tasks[index].start_time = core_times[core] + 1
+        new_tasks[index].start_time = core_times[core] # + 1
         for dep in new_tasks[index].deps:
             # calculate end_time for task's dependencies
             dep_end_time = dep.start_time + dep.exec_time * (low_perf_multiplier if dep.core < total_cores / 2 else 1)
@@ -117,6 +123,10 @@ def get_makespan(tasks, schedule):
             for task in queue:
                 core_exec_sum[core] += task.exec_time
 
+    if print_out:
+        logging.info("-"*20)
+        for nc, c in enumerate(core_queues):
+            logging.info("core %s: %s", nc+1, c)
     return max(core_times), core_exec_sum
 
 
@@ -137,7 +147,7 @@ def get_individual_fitness(tasks, individual):
         core_queues[core].append(new_tasks[index])
         new_tasks[index].core = core
         # set the task's start_time to core's current time
-        new_tasks[index].start_time = core_times[core] + 1
+        new_tasks[index].start_time = core_times[core] # + 1
         for dep in new_tasks[index].deps:
             # calculate end_time for task's dependencies
             dep_end_time = dep.start_time + dep.exec_time * (low_perf_multiplier if dep.core < total_cores / 2 else 1)
@@ -352,13 +362,16 @@ def plot(history_max, history_min, history_avg, makespans, tot_generations):
         # plt.show()
     except ImportError:
         print("Please install matplotlib if you want to see the fitness/generation plot.")
-        pass # module doesn't exist, deal with it.
+        pass # module doesn't exist, deal with it. 
 
 
 
 
 def main():
-    add_deadline(src='gaussian_elimination.stg', dst='deadline.stg')
+    # add_deadline(src='stg/fft.stg', dst='deadline.stg')
+    # add_deadline(src='stg/laplace.stg', dst='deadline.stg')
+    # add_deadline(src='stg/gaussian_elimination.stg', dst='deadline.stg')
+    add_deadline(src='stg/sparse', dst='deadline.stg')
     fitness_mean_history = list()
     fitness_min_history = list()
     fitness_max_history = list()
@@ -366,7 +379,12 @@ def main():
     tasks = parse_tasks()
     population_size = 200
     tot_generations = 50
-    print("population: {}  total generations: {}".format(population_size, tot_generations))
+    logging.info("population: {}  total generations: {}".format(population_size, tot_generations))
+    logging.info("="*20 + " Tasks " + "="*20)
+    for t in tasks:
+        logging.info(t)
+    logging.info("="*50)
+
     population = create_population(tasks, population_size)
     fitness, _ = get_population_fitness(tasks, population)
 
@@ -376,6 +394,7 @@ def main():
     fitness_mean_history.append( sum(fitness)/len(fitness) )
 
     core_exec_sum = list()
+    best = None
 
     for i in range(tot_generations):
         population = evolve(tasks, population, fitness)
@@ -388,11 +407,14 @@ def main():
         score = max(fitness)
         missed = sum(missed)/len(missed)
         makespan, core_exec_sum = get_makespan(tasks, population[maxl(fitness)])
+        best = population[ fitness.index(score) ]
         # fitness_history.append(score)
         makespan_history.append(makespan)
-        print('iteration {} max_score: {} avg_missed: {} makespan: {}'.format(i + 1, score, missed, makespan))
+        logging.info('iteration {} max_score: {} avg_missed: {} makespan: {}'.format(i + 1, score, missed, makespan))
 
-    print("totla execution time on each core: %s" % core_exec_sum)
+    logging.info("totla execution time on each core: %s" % core_exec_sum)
+    logging.info("best schedule: %s", best)
+    get_makespan(tasks, best, True)
     
     plot(fitness_max_history[0:-1],
                 fitness_min_history[0:-1], 
