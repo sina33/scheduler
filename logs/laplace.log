@@ -1,0 +1,78 @@
+INFO:root:population: 200  total generations: 50
+INFO:root:==================== Tasks ====================
+INFO:root:id: 0 exec_time: 0 deps: []
+INFO:root:id: 1 exec_time: 80 deps: []
+INFO:root:id: 2 exec_time: 90 deps: [1]
+INFO:root:id: 3 exec_time: 90 deps: [1]
+INFO:root:id: 4 exec_time: 90 deps: [2]
+INFO:root:id: 5 exec_time: 100 deps: [2, 3]
+INFO:root:id: 6 exec_time: 90 deps: [3]
+INFO:root:id: 7 exec_time: 80 deps: [4]
+INFO:root:id: 8 exec_time: 100 deps: [4, 5]
+INFO:root:id: 9 exec_time: 100 deps: [5, 6]
+INFO:root:id: 10 exec_time: 80 deps: [6]
+INFO:root:id: 11 exec_time: 90 deps: [7, 8]
+INFO:root:id: 12 exec_time: 100 deps: [8, 9]
+INFO:root:id: 13 exec_time: 90 deps: [9, 10]
+INFO:root:id: 14 exec_time: 90 deps: [11, 12]
+INFO:root:id: 15 exec_time: 90 deps: [13]
+INFO:root:id: 16 exec_time: 80 deps: [14, 15]
+INFO:root:==================================================
+INFO:root:iteration 1 max_score: -359 avg_missed: 9.95 makespan: 1150
+INFO:root:iteration 2 max_score: 2626 avg_missed: 7.595 makespan: 980
+INFO:root:iteration 3 max_score: 3096 avg_missed: 5.82 makespan: 1030
+INFO:root:iteration 4 max_score: 3346 avg_missed: 3.645 makespan: 960
+INFO:root:iteration 5 max_score: 3476 avg_missed: 1.615 makespan: 860
+INFO:root:iteration 6 max_score: 3746 avg_missed: 1.02 makespan: 850
+INFO:root:iteration 7 max_score: 3746 avg_missed: 0.315 makespan: 850
+INFO:root:iteration 8 max_score: 3836 avg_missed: 0.06 makespan: 850
+INFO:root:iteration 9 max_score: 3836 avg_missed: 0.08 makespan: 850
+INFO:root:iteration 10 max_score: 3836 avg_missed: 0.315 makespan: 850
+INFO:root:iteration 11 max_score: 3976 avg_missed: 0.035 makespan: 800
+INFO:root:iteration 12 max_score: 3976 avg_missed: 0.0 makespan: 800
+INFO:root:iteration 13 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 14 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 15 max_score: 4056 avg_missed: 0.02 makespan: 720
+INFO:root:iteration 16 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 17 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 18 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 19 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 20 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 21 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 22 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 23 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 24 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 25 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 26 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 27 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 28 max_score: 4056 avg_missed: 0.015 makespan: 720
+INFO:root:iteration 29 max_score: 4056 avg_missed: 0.005 makespan: 720
+INFO:root:iteration 30 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 31 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 32 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 33 max_score: 4056 avg_missed: 0.02 makespan: 720
+INFO:root:iteration 34 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 35 max_score: 4056 avg_missed: 0.015 makespan: 720
+INFO:root:iteration 36 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 37 max_score: 4056 avg_missed: 0.015 makespan: 720
+INFO:root:iteration 38 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 39 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 40 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 41 max_score: 4056 avg_missed: 0.025 makespan: 720
+INFO:root:iteration 42 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 43 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 44 max_score: 4056 avg_missed: 0.005 makespan: 720
+INFO:root:iteration 45 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 46 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 47 max_score: 4056 avg_missed: 0.015 makespan: 720
+INFO:root:iteration 48 max_score: 4056 avg_missed: 0.005 makespan: 720
+INFO:root:iteration 49 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:iteration 50 max_score: 4056 avg_missed: 0.0 makespan: 720
+INFO:root:total execution time on each core: [180, 0, 710, 550]
+INFO:root:best schedule: [1, 2, 3, 2, 2, 3, 0, 2, 3, 2, 3, 0, 2, 3, 2, 3, 2]
+INFO:root:--------------------
+INFO:root:core 0: {6: (170, 350), 11: (370, 550)}
+INFO:root:core 1: {0: (0, 0)}
+INFO:root:core 2: {1: (0, 80), 3: (80, 170), 4: (170, 260), 7: (260, 340), 9: (350, 450), 12: (450, 550), 14: (550, 640), 16: (640, 720)}
+INFO:root:core 3: {2: (80, 170), 5: (170, 270), 8: (270, 370), 10: (370, 450), 13: (450, 540), 15: (540, 630)}
+INFO:root:makespan: 720

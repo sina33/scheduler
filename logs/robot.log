@@ -1,0 +1,151 @@
+INFO:root:population: 200  total generations: 50
+INFO:root:==================== Tasks ====================
+INFO:root:id: 0 exec_time: 0 deps: []
+INFO:root:id: 1 exec_time: 1 deps: [0]
+INFO:root:id: 2 exec_time: 1 deps: [0]
+INFO:root:id: 3 exec_time: 5 deps: [1]
+INFO:root:id: 4 exec_time: 5 deps: [1]
+INFO:root:id: 5 exec_time: 10 deps: [1]
+INFO:root:id: 6 exec_time: 28 deps: [1, 4]
+INFO:root:id: 7 exec_time: 5 deps: [1]
+INFO:root:id: 8 exec_time: 10 deps: [1]
+INFO:root:id: 9 exec_time: 1 deps: [5, 6]
+INFO:root:id: 10 exec_time: 57 deps: [5]
+INFO:root:id: 11 exec_time: 66 deps: [5]
+INFO:root:id: 12 exec_time: 38 deps: [5]
+INFO:root:id: 13 exec_time: 15 deps: [6]
+INFO:root:id: 14 exec_time: 24 deps: [6]
+INFO:root:id: 15 exec_time: 10 deps: [6]
+INFO:root:id: 16 exec_time: 15 deps: [2, 7, 8]
+INFO:root:id: 17 exec_time: 10 deps: [2]
+INFO:root:id: 18 exec_time: 10 deps: [9]
+INFO:root:id: 19 exec_time: 24 deps: [12, 15, 17]
+INFO:root:id: 20 exec_time: 40 deps: [9, 18]
+INFO:root:id: 21 exec_time: 32 deps: [9]
+INFO:root:id: 22 exec_time: 57 deps: [9]
+INFO:root:id: 23 exec_time: 15 deps: [9]
+INFO:root:id: 24 exec_time: 10 deps: [9]
+INFO:root:id: 25 exec_time: 38 deps: [9]
+INFO:root:id: 26 exec_time: 53 deps: [9]
+INFO:root:id: 27 exec_time: 10 deps: [9]
+INFO:root:id: 28 exec_time: 12 deps: [10, 13]
+INFO:root:id: 29 exec_time: 39 deps: [11, 14, 19]
+INFO:root:id: 30 exec_time: 4 deps: [19]
+INFO:root:id: 31 exec_time: 24 deps: [26, 27, 30]
+INFO:root:id: 32 exec_time: 24 deps: [20]
+INFO:root:id: 33 exec_time: 15 deps: [20]
+INFO:root:id: 34 exec_time: 10 deps: [21]
+INFO:root:id: 35 exec_time: 32 deps: [21]
+INFO:root:id: 36 exec_time: 57 deps: [21]
+INFO:root:id: 37 exec_time: 66 deps: [21]
+INFO:root:id: 38 exec_time: 12 deps: [22, 23]
+INFO:root:id: 39 exec_time: 39 deps: [24, 25, 31]
+INFO:root:id: 40 exec_time: 28 deps: [31]
+INFO:root:id: 41 exec_time: 40 deps: [20, 34]
+INFO:root:id: 42 exec_time: 12 deps: [33, 36]
+INFO:root:id: 43 exec_time: 10 deps: [35]
+INFO:root:id: 44 exec_time: 57 deps: [35]
+INFO:root:id: 45 exec_time: 32 deps: [35]
+INFO:root:id: 46 exec_time: 66 deps: [35]
+INFO:root:id: 47 exec_time: 15 deps: [41]
+INFO:root:id: 48 exec_time: 24 deps: [41]
+INFO:root:id: 49 exec_time: 39 deps: [32, 37]
+INFO:root:id: 50 exec_time: 28 deps: [40]
+INFO:root:id: 51 exec_time: 40 deps: [41, 43]
+INFO:root:id: 52 exec_time: 12 deps: [44, 47]
+INFO:root:id: 53 exec_time: 111 deps: [45]
+INFO:root:id: 54 exec_time: 84 deps: [45]
+INFO:root:id: 55 exec_time: 38 deps: [45]
+INFO:root:id: 56 exec_time: 39 deps: [46, 48, 50]
+INFO:root:id: 57 exec_time: 28 deps: [50]
+INFO:root:id: 58 exec_time: 69 deps: [51]
+INFO:root:id: 59 exec_time: 42 deps: [51]
+INFO:root:id: 60 exec_time: 10 deps: [51]
+INFO:root:id: 61 exec_time: 24 deps: [55, 57, 60]
+INFO:root:id: 62 exec_time: 12 deps: [53, 58]
+INFO:root:id: 63 exec_time: 39 deps: [54, 59, 61]
+INFO:root:id: 64 exec_time: 42 deps: [63]
+INFO:root:id: 65 exec_time: 12 deps: [62, 64]
+INFO:root:id: 66 exec_time: 28 deps: [65]
+INFO:root:id: 67 exec_time: 24 deps: [56]
+INFO:root:id: 68 exec_time: 40 deps: [56]
+INFO:root:id: 69 exec_time: 24 deps: [52, 66, 67]
+INFO:root:id: 70 exec_time: 24 deps: [49]
+INFO:root:id: 71 exec_time: 28 deps: [69]
+INFO:root:id: 72 exec_time: 40 deps: [49, 68]
+INFO:root:id: 73 exec_time: 40 deps: [39, 72]
+INFO:root:id: 74 exec_time: 38 deps: [72]
+INFO:root:id: 75 exec_time: 24 deps: [42, 70, 71]
+INFO:root:id: 76 exec_time: 36 deps: [74, 75]
+INFO:root:id: 77 exec_time: 10 deps: [39]
+INFO:root:id: 78 exec_time: 24 deps: [38, 76, 77]
+INFO:root:id: 79 exec_time: 10 deps: [73]
+INFO:root:id: 80 exec_time: 12 deps: [29, 73]
+INFO:root:id: 81 exec_time: 40 deps: [16, 80]
+INFO:root:id: 82 exec_time: 24 deps: [29]
+INFO:root:id: 83 exec_time: 8 deps: [78, 79]
+INFO:root:id: 84 exec_time: 24 deps: [28, 82, 83]
+INFO:root:id: 85 exec_time: 24 deps: [80]
+INFO:root:id: 86 exec_time: 36 deps: [84, 85]
+INFO:root:id: 87 exec_time: 24 deps: [16]
+INFO:root:id: 88 exec_time: 24 deps: [3, 86, 87]
+INFO:root:id: 89 exec_time: 0 deps: [81, 88]
+INFO:root:==================================================
+INFO:root:iteration 1 max_score: -2457 avg_missed: 55.46 makespan: 1886
+INFO:root:iteration 2 max_score: -511 avg_missed: 46.31 makespan: 1924
+INFO:root:iteration 3 max_score: 14574 avg_missed: 33.69 makespan: 1675
+INFO:root:iteration 4 max_score: 25752 avg_missed: 23.95 makespan: 1639
+INFO:root:iteration 5 max_score: 26649 avg_missed: 15.055 makespan: 1544
+INFO:root:iteration 6 max_score: 29228 avg_missed: 6.72 makespan: 1552
+INFO:root:iteration 7 max_score: 30760 avg_missed: 4.475 makespan: 1467
+INFO:root:iteration 8 max_score: 32145 avg_missed: 1.36 makespan: 1442
+INFO:root:iteration 9 max_score: 33046 avg_missed: 0.975 makespan: 1366
+INFO:root:iteration 10 max_score: 33435 avg_missed: 0.545 makespan: 1383
+INFO:root:iteration 11 max_score: 33673 avg_missed: 0.62 makespan: 1341
+INFO:root:iteration 12 max_score: 35299 avg_missed: 0.39 makespan: 1242
+INFO:root:iteration 13 max_score: 35656 avg_missed: 0.205 makespan: 1356
+INFO:root:iteration 14 max_score: 36376 avg_missed: 0.285 makespan: 1258
+INFO:root:iteration 15 max_score: 37000 avg_missed: 0.235 makespan: 1284
+INFO:root:iteration 16 max_score: 37888 avg_missed: 0.345 makespan: 1213
+INFO:root:iteration 17 max_score: 37888 avg_missed: 0.235 makespan: 1213
+INFO:root:iteration 18 max_score: 38527 avg_missed: 0.26 makespan: 1180
+INFO:root:iteration 19 max_score: 38527 avg_missed: 0.22 makespan: 1180
+INFO:root:iteration 20 max_score: 38527 avg_missed: 0.21 makespan: 1180
+INFO:root:iteration 21 max_score: 38703 avg_missed: 0.055 makespan: 1190
+INFO:root:iteration 22 max_score: 38724 avg_missed: 0.11 makespan: 1174
+INFO:root:iteration 23 max_score: 39131 avg_missed: 0.04 makespan: 1174
+INFO:root:iteration 24 max_score: 39256 avg_missed: 0.035 makespan: 1173
+INFO:root:iteration 25 max_score: 39531 avg_missed: 0.065 makespan: 1179
+INFO:root:iteration 26 max_score: 39493 avg_missed: 0.035 makespan: 1123
+INFO:root:iteration 27 max_score: 39493 avg_missed: 0.015 makespan: 1123
+INFO:root:iteration 28 max_score: 39541 avg_missed: 0.0 makespan: 1179
+INFO:root:iteration 29 max_score: 39623 avg_missed: 0.01 makespan: 1177
+INFO:root:iteration 30 max_score: 39636 avg_missed: 0.0 makespan: 1175
+INFO:root:iteration 31 max_score: 39795 avg_missed: 0.0 makespan: 1126
+INFO:root:iteration 32 max_score: 39843 avg_missed: 0.0 makespan: 1126
+INFO:root:iteration 33 max_score: 39970 avg_missed: 0.0 makespan: 1126
+INFO:root:iteration 34 max_score: 40043 avg_missed: 0.0 makespan: 1126
+INFO:root:iteration 35 max_score: 40043 avg_missed: 0.03 makespan: 1126
+INFO:root:iteration 36 max_score: 40043 avg_missed: 0.04 makespan: 1126
+INFO:root:iteration 37 max_score: 40202 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 38 max_score: 40202 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 39 max_score: 40214 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 40 max_score: 40214 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 41 max_score: 40214 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 42 max_score: 40491 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 43 max_score: 40491 avg_missed: 0.01 makespan: 1114
+INFO:root:iteration 44 max_score: 40491 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 45 max_score: 40491 avg_missed: 0.0 makespan: 1114
+INFO:root:iteration 46 max_score: 40504 avg_missed: 0.0 makespan: 1104
+INFO:root:iteration 47 max_score: 40763 avg_missed: 0.0 makespan: 1086
+INFO:root:iteration 48 max_score: 40763 avg_missed: 0.06 makespan: 1086
+INFO:root:iteration 49 max_score: 40799 avg_missed: 0.0 makespan: 1076
+INFO:root:iteration 50 max_score: 40799 avg_missed: 0.0 makespan: 1076
+INFO:root:total execution time on each core: [474, 450, 880, 679]
+INFO:root:best schedule: [1, 2, 0, 3, 3, 2, 2, 0, 1, 0, 3, 3, 2, 0, 1, 0, 0, 2, 0, 1, 0, 3, 3, 1, 1, 2, 2, 0, 1, 2, 1, 0, 0, 1, 2, 3, 3, 2, 0, 3, 3, 1, 1, 1, 2, 2, 2, 0, 2, 1, 3, 2, 1, 3, 3, 0, 1, 0, 2, 0, 1, 2, 3, 2, 2, 2, 2, 1, 0, 2, 0, 2, 1, 1, 2, 0, 0, 3, 2, 1, 1, 2, 3, 3, 3, 0, 0, 1, 1, 0]
+INFO:root:--------------------
+INFO:root:core 0: {2: (0, 2), 7: (2, 12), 9: (39, 41), 13: (41, 71), 15: (71, 91), 16: (91, 121), 18: (121, 141), 20: (141, 221), 27: (221, 241), 31: (241, 289), 32: (289, 337), 38: (337, 361), 47: (361, 391), 55: (391, 467), 57: (467, 523), 59: (523, 607), 68: (607, 687), 70: (687, 735), 75: (780, 828), 76: (828, 900), 85: (900, 948), 86: (956, 1028), 89: (1076, 1076)}
+INFO:root:core 1: {0: (0, 0), 8: (1, 21), 14: (39, 87), 19: (91, 139), 23: (139, 169), 24: (169, 189), 28: (189, 213), 30: (213, 221), 33: (221, 251), 41: (251, 331), 42: (331, 355), 43: (355, 375), 49: (375, 453), 52: (453, 477), 56: (477, 555), 60: (555, 575), 67: (575, 623), 72: (687, 767), 73: (767, 847), 79: (847, 867), 80: (867, 891), 87: (891, 939), 88: (1028, 1076)}
+INFO:root:core 2: {1: (0, 1), 5: (1, 11), 6: (11, 39), 12: (39, 77), 17: (77, 87), 25: (87, 125), 26: (125, 178), 29: (178, 217), 34: (217, 227), 37: (227, 293), 44: (293, 350), 45: (350, 382), 46: (382, 448), 48: (448, 472), 51: (472, 512), 58: (512, 581), 61: (581, 605), 63: (607, 646), 64: (646, 688), 65: (688, 700), 66: (700, 728), 69: (728, 752), 71: (752, 780), 74: (780, 818), 78: (900, 924), 81: (924, 964)}
+INFO:root:core 3: {3: (1, 6), 4: (6, 11), 10: (11, 68), 11: (68, 134), 21: (134, 166), 22: (166, 223), 35: (223, 255), 36: (255, 312), 39: (312, 351), 40: (351, 379), 50: (379, 407), 53: (407, 518), 54: (518, 602), 62: (602, 614), 77: (614, 624), 82: (624, 648), 83: (924, 932), 84: (932, 956)}
+INFO:root:makespan: 1076
