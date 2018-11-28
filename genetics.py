@@ -9,6 +9,8 @@ logging.basicConfig(level=logging.INFO)
 
 total_cores = 4
 low_perf_multiplier = 2
+task_graph = 'robot' # one of ['fpppp', 'sparse', 'robot']
+stgs = ['fpppp', 'sparse', 'robot']
 
 # Gets the index of maximum element in a list. If a conflict occurs, the index of the last largest is returned
 def maxl(l): return l.index(reduce(lambda x,y: max(x,y), l))
@@ -36,6 +38,10 @@ class Task:
         else:
            exec_time = self.exec_time * (low_perf_multiplier if self.core < total_cores / 2 else 1)
            return '{}: ({}, {})'.format(self.id, self.start_time, self.start_time+exec_time)
+
+    def finish_time(self):
+        exec_time = self.exec_time * (low_perf_multiplier if self.core < total_cores / 2 else 1)
+        return self.start_time+exec_time
 
 
 class Job:
@@ -126,7 +132,13 @@ def get_makespan(tasks, schedule, print_out=False):
     if print_out:
         logging.info("-"*20)
         for nc, c in enumerate(core_queues):
-            logging.info("core %s: %s", nc+1, c)
+            # convert list to dict
+            sorted_core_queue = sorted(c, key=lambda x: x.finish_time())
+            logging.info("core %s: %s", nc, {t.id: (t.start_time, t.finish_time()) for t in sorted_core_queue})
+        longest = 0
+        for t in new_tasks:
+            longest = t.finish_time() if t.finish_time() > longest else longest
+        logging.info('makespan: %s', longest)
     return max(core_times), core_exec_sum
 
 
@@ -371,7 +383,8 @@ def main():
     # add_deadline(src='stg/fft.stg', dst='deadline.stg')
     # add_deadline(src='stg/laplace.stg', dst='deadline.stg')
     # add_deadline(src='stg/gaussian_elimination.stg', dst='deadline.stg')
-    add_deadline(src='stg/sparse', dst='deadline.stg')
+    if task_graph in stgs:
+        add_deadline(src='stg/' + task_graph, dst='deadline.stg')
     fitness_mean_history = list()
     fitness_min_history = list()
     fitness_max_history = list()
