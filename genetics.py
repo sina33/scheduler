@@ -5,12 +5,23 @@ from random import randint, random, randrange
 from functools import reduce
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
-logging.basicConfig(level=logging.INFO)
+
+
+### Configs
+stgs = ['fpppp', 'sparse', 'robot', 'fft.stg', 'laplace.stg', 'gaussian_elimination.stg']
+task_graph = stgs[0]
+log_to_file = True
+log_level = logging.INFO
+###
 
 total_cores = 4
 low_perf_multiplier = 2
-task_graph = 'robot' # one of ['fpppp', 'sparse', 'robot']
-stgs = ['fpppp', 'sparse', 'robot']
+if log_to_file:
+    log_filename = 'logs/' + task_graph.split('.')[0] + '.log'
+    logging.basicConfig(level=log_level, filename=log_filename)
+else:
+    logging.basicConfig(level=log_level)
+
 
 # Gets the index of maximum element in a list. If a conflict occurs, the index of the last largest is returned
 def maxl(l): return l.index(reduce(lambda x,y: max(x,y), l))
@@ -380,11 +391,7 @@ def plot(history_max, history_min, history_avg, makespans, tot_generations):
 
 
 def main():
-    # add_deadline(src='stg/fft.stg', dst='deadline.stg')
-    # add_deadline(src='stg/laplace.stg', dst='deadline.stg')
-    # add_deadline(src='stg/gaussian_elimination.stg', dst='deadline.stg')
-    if task_graph in stgs:
-        add_deadline(src='stg/' + task_graph, dst='deadline.stg')
+    add_deadline(src='stg/' + task_graph, dst='deadline.stg')
     fitness_mean_history = list()
     fitness_min_history = list()
     fitness_max_history = list()
@@ -425,7 +432,7 @@ def main():
         makespan_history.append(makespan)
         logging.info('iteration {} max_score: {} avg_missed: {} makespan: {}'.format(i + 1, score, missed, makespan))
 
-    logging.info("totla execution time on each core: %s" % core_exec_sum)
+    logging.info("total execution time on each core: %s" % core_exec_sum)
     logging.info("best schedule: %s", best)
     get_makespan(tasks, best, True)
     
